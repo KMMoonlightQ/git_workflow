@@ -1,0 +1,21 @@
+{
+  "name": "pr-review-tui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build --compile --minify --no-compile-autoload-dotenv --no-compile-autoload-bunfig ./src/index.ts --outfile ./dist/pr-review",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentui/core": "0.5.11"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "bun": "1.4.2",
+    "typescript": "7.0.2"
+  }
+}
