@@ -2,6 +2,19 @@
 
 TypeScript + OpenTUI 的 GitHub Review 列表，复用本机 `gh` 登录。
 
+## Homebrew 安装与更新
+
+macOS Apple Silicon 用户可以直接安装，无需另装 Node.js 或 Bun：
+
+```sh
+brew install KMMoonlightQ/tools/git-workflow
+git-workflow
+```
+
+更新使用 `brew update` 和 `brew upgrade KMMoonlightQ/tools/git-workflow`。旧 Homebrew 名称 `git_workflow` 会迁移到 `git-workflow`；旧命令作为兼容入口保留。
+
+## 从源码运行
+
 ```sh
 npm install
 npm start
