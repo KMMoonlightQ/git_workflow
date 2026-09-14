@@ -31,7 +31,7 @@ export class PullRequestList {
   private rows: Row[] = [];
   private selectedIndex = 0;
   private pendingReveal = false;
-  private pressedRowId: number | undefined;
+  private pressedRow: { id: number; x: number; y: number } | undefined;
   private copiedId: number | undefined;
   private copyTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -74,7 +74,7 @@ export class PullRequestList {
     const oldIndex = this.selectedIndex;
     for (const child of this.scroll.getChildren()) child.destroyRecursively();
     this.rows = [];
-    this.pressedRowId = undefined;
+    this.pressedRow = undefined;
     let line = 0;
     const groups = groupPullRequests(pulls);
     for (const [groupIndex, group] of groups.entries()) {
@@ -98,15 +98,23 @@ export class PullRequestList {
           onMouseDown: (event) => {
             if (event.button !== 0) return;
             event.preventDefault();
-            this.pressedRowId = pull.id;
+            this.pressedRow = { id: pull.id, x: event.x, y: event.y };
             this.select(index);
           },
-          onMouseDrag: () => { this.pressedRowId = undefined; },
+          onMouseDrag: (event) => {
+            // Held-button motion can be reported without leaving the cell.
+            // Allow one column of click jitter, but cancel once a drag leaves it.
+            if (!this.isWithinClickTolerance(pull.id, event)) this.pressedRow = undefined;
+          },
           onMouseUp: (event) => {
             if (event.button !== 0) return;
             event.preventDefault();
-            if (this.pressedRowId === pull.id) this.actions.copy(pull);
-            this.pressedRowId = undefined;
+            const clicked = this.isWithinClickTolerance(pull.id, event)
+              && event.x >= box.x && event.x < box.x + box.width
+              && event.y === box.y;
+            // A captured mouse release can bubble through the row twice.
+            this.pressedRow = undefined;
+            if (clicked) this.actions.copy(pull);
           },
         });
         const status = STATUS[pull.status];
@@ -165,6 +173,12 @@ export class PullRequestList {
       this.copiedId = undefined;
       this.paintCopyIndicator();
     }, 2_000);
+  }
+
+  private isWithinClickTolerance(id: number, event: { x: number; y: number }): boolean {
+    return this.pressedRow?.id === id
+      && event.y === this.pressedRow.y
+      && Math.abs(event.x - this.pressedRow.x) <= 1;
   }
 
   private paintCopyIndicator(): void {

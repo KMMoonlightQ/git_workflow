@@ -143,3 +143,66 @@ test("left click copies the clicked PR link; right click, drag, and repo heading
     setup.renderer.destroy();
   }
 });
+
+test("clicks with small pointer motion still copy once and show confirmation across the PR row", async () => {
+  const setup = await createTestRenderer({ width: 76, height: 12 });
+  const copied: string[] = [];
+  try {
+    const list = new PullRequestList(setup.renderer, {
+      refresh() {}, open() {},
+      copy: (pull) => { copied.push(pull.url); list.showCopied(pull.id); },
+    });
+    const clicked = pull();
+    list.setPulls([clicked]);
+    await setup.renderOnce();
+    const row = setup.renderer.root.findDescendantById(`pr-${clicked.id}`)!;
+    // Exercise padding and each text column, which have different hit targets.
+    let clicks = 0;
+    for (const motion of [0, 1]) {
+      for (const column of [-1, 0, 1, 2, 4]) {
+        const x = column < 0 ? row.x : row.getChildren()[column]!.x + 1;
+        const y = row.y;
+        await setup.mockMouse.pressDown(x, y);
+        await setup.renderOnce();
+        // A terminal can report held-button motion even within the same cell.
+        setup.renderer.stdin.emit("data", Buffer.from(`\x1b[<32;${x + 1};${y + 1}M`));
+        setup.renderer.stdin.emit("data", Buffer.from(`\x1b[<32;${x + motion + 1};${y + 1}M`));
+        await setup.mockMouse.release(x + motion, y);
+        await setup.renderOnce();
+        expect(copied).toEqual(Array(++clicks).fill(clicked.url));
+        expect(setup.captureCharFrame()).toContain("✓ 已复制");
+      }
+    }
+  } finally {
+    setup.renderer.destroy();
+  }
+});
+
+test("dragging away and back, releasing on another row, and refreshing mid-click do not copy", async () => {
+  const setup = await createTestRenderer({ width: 76, height: 12 });
+  const copied: string[] = [];
+  try {
+    const list = new PullRequestList(setup.renderer, {
+      refresh() {}, open() {}, copy: (pull) => { copied.push(pull.url); },
+    });
+    const pulls = [pull(), pull({ id: 2, number: 43 })];
+    list.setPulls(pulls);
+    await setup.renderOnce();
+    const row = setup.renderer.root.findDescendantById("pr-1")!;
+    const x = row.x + 8;
+    const y = row.y;
+    await setup.mockMouse.pressDown(x, y);
+    await setup.mockMouse.moveTo(x + 6, y);
+    await setup.mockMouse.moveTo(x, y);
+    await setup.mockMouse.release(x, y);
+    await setup.mockMouse.pressDown(x, y);
+    await setup.mockMouse.release(x, y - 1);
+    await setup.mockMouse.pressDown(x, y);
+    list.setPulls(pulls);
+    await setup.renderOnce();
+    await setup.mockMouse.release(x, y);
+    expect(copied).toEqual([]);
+  } finally {
+    setup.renderer.destroy();
+  }
+});
