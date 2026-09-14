@@ -1,4 +1,4 @@
-# PR Review
+# git_workflow
 
 TypeScript + OpenTUI 的 GitHub Review 列表，复用本机 `gh` 登录。
 
@@ -9,14 +9,30 @@ npm start
 
 项目内置 Bun 运行时，无需全局安装 Bun。需要可用的 GitHub CLI；尚未登录时运行 `gh auth login`。
 
+安装到当前用户并自动配置 PATH：
+
+```sh
+npm run install:local
+```
+
+安装程序将独立可执行文件复制到 `~/.local/bin/git_workflow`，并将该目录写入 shell 启动配置（zsh 使用 `${ZDOTDIR:-$HOME}/.zshrc`）。首次修改前会保存 `.git_workflow.bak` 备份；重复安装会更新程序，且不会重复添加 PATH 条目。
+
+重新打开终端，即可在任意目录运行：
+
+```sh
+git_workflow
+```
+
+当前 zsh 终端也可以执行 `source "${ZDOTDIR:-$HOME}/.zshrc"` 立即生效。
+
 打包为当前系统和 CPU 架构的独立可执行程序：
 
 ```sh
 npm run build
-./dist/pr-review
+./dist/git_workflow
 ```
 
-`dist/pr-review` 内含 Bun 运行时和 OpenTUI 原生库，可以复制到同平台机器运行，无需安装 Node.js、Bun 或项目依赖。运行时仍需本机已登录的 `gh`。当前构建平台为 macOS Apple Silicon（arm64）。
+`dist/git_workflow` 内含 Bun 运行时和 OpenTUI 原生库，可以复制到同平台机器运行，无需安装 Node.js、Bun 或项目依赖。直接运行 `./git_workflow --install` 即可安装并配置 PATH。运行时仍需本机已登录的 `gh`。当前构建平台为 macOS Apple Silicon（arm64）。
 
 按完整仓库名分组，同仓库内最近更新的 PR 在前。每行依次展示编号、标题、`@author` 和状态，状态在行末对齐。
 

@@ -1,12 +1,13 @@
 {
-  "name": "pr-review-tui",
+  "name": "git_workflow",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bun build --compile --minify --no-compile-autoload-dotenv --no-compile-autoload-bunfig ./src/index.ts --outfile ./dist/pr-review",
+    "build": "bun build --compile --minify --no-compile-autoload-dotenv --no-compile-autoload-bunfig ./src/index.ts --outfile ./dist/git_workflow",
+    "install:local": "npm run build && ./dist/git_workflow --install",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

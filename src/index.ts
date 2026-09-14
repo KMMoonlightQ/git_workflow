@@ -2,8 +2,18 @@ import { createClipboard, createCliRenderer, createHostClipboard, createRenderer
 import { GitHubClient } from "./github";
 import { PullRequestList, THEME } from "./ui";
 import { singleLine } from "./model";
+import { installExecutable } from "./install";
+import { fileURLToPath } from "node:url";
 
 async function main(): Promise<void> {
+  if (process.argv.includes("--install")) {
+    const source = import.meta.url.includes("/$bunfs/")
+      ? process.execPath
+      : fileURLToPath(new URL("../dist/git_workflow", import.meta.url));
+    const result = await installExecutable(source);
+    process.stdout.write(`已安装：${result.executablePath}\nPATH 已配置：${result.shellConfigFile}\n重新打开终端后，运行 git_workflow\n`);
+    return;
+  }
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     throw new Error("请在交互式终端中运行此程序");
   }
@@ -12,6 +22,7 @@ async function main(): Promise<void> {
     backgroundColor: THEME.background,
     consoleMode: "disabled",
   });
+  renderer.setTerminalTitle("git_workflow");
   const abort = new AbortController();
   const github = new GitHubClient();
   const clipboard = createClipboard({
