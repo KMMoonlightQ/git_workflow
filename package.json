@@ -1,13 +1,13 @@
 {
-  "name": "git_workflow",
+  "name": "git-workflow",
   "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "build": "bun build --compile --minify --no-compile-autoload-dotenv --no-compile-autoload-bunfig ./src/index.ts --outfile ./dist/git_workflow",
-    "install:local": "npm run build && ./dist/git_workflow --install",
+    "build": "bun build --compile --minify --no-compile-autoload-dotenv --no-compile-autoload-bunfig ./src/index.ts --outfile ./dist/git-workflow",
+    "install:local": "npm run build && ./dist/git-workflow --install",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

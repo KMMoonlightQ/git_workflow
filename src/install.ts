@@ -3,8 +3,8 @@ import { access, chmod, copyFile, mkdir, mkdtemp, readFile, rename, rm, writeFil
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 
-const startMarker = "# >>> git_workflow >>>";
-const endMarker = "# <<< git_workflow <<<";
+const startMarker = "# >>> git-workflow >>>";
+const endMarker = "# <<< git-workflow <<<";
 
 interface InstallOptions {
   binDirectory?: string;
@@ -27,7 +27,7 @@ function defaultShellConfig(): string {
 export async function installExecutable(source: string, options: InstallOptions = {}) {
   const binDirectory = options.binDirectory ?? join(homedir(), ".local", "bin");
   const shellConfigFile = options.shellConfigFile ?? defaultShellConfig();
-  const executablePath = join(binDirectory, "git_workflow");
+  const executablePath = join(binDirectory, "git-workflow");
   await access(source, constants.R_OK | constants.X_OK);
 
   let existing = "";
@@ -48,8 +48,8 @@ export async function installExecutable(source: string, options: InstallOptions 
   ].join("\n");
   // Reuse the previous installer's PATH block when upgrading the command name.
   const currentMarkers = existing.includes(startMarker) || existing.includes(endMarker);
-  const previousStartMarker = currentMarkers ? startMarker : "# >>> git-workflow >>>";
-  const previousEndMarker = currentMarkers ? endMarker : "# <<< git-workflow <<<";
+  const previousStartMarker = currentMarkers ? startMarker : "# >>> git_workflow >>>";
+  const previousEndMarker = currentMarkers ? endMarker : "# <<< git_workflow <<<";
   const start = existing.indexOf(previousStartMarker);
   const end = existing.indexOf(previousEndMarker);
   if ((start >= 0) !== (end >= 0) || (start >= 0 && end < start)) {
@@ -61,9 +61,9 @@ export async function installExecutable(source: string, options: InstallOptions 
 
   await mkdir(binDirectory, { recursive: true });
   // Replace by rename so reinstalling is safe even while the old binary runs.
-  const temporary = await mkdtemp(join(binDirectory, ".git_workflow-install-"));
+  const temporary = await mkdtemp(join(binDirectory, ".git-workflow-install-"));
   try {
-    const staged = join(temporary, "git_workflow");
+    const staged = join(temporary, "git-workflow");
     await copyFile(source, staged);
     await chmod(staged, 0o755);
     await rename(staged, executablePath);
@@ -75,7 +75,7 @@ export async function installExecutable(source: string, options: InstallOptions 
     await mkdir(dirname(shellConfigFile), { recursive: true });
     if (configExists) {
       try {
-        await copyFile(shellConfigFile, `${shellConfigFile}.git_workflow.bak`, constants.COPYFILE_EXCL);
+        await copyFile(shellConfigFile, `${shellConfigFile}.git-workflow.bak`, constants.COPYFILE_EXCL);
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       }

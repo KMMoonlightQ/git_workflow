@@ -72,12 +72,12 @@ test("retains the same PR through every review transition even after its request
       return JSON.stringify({ total_count: items.length, incomplete_results: false, items });
     }
     if (args[1]?.includes("/reviews?")) {
-      return JSON.stringify([phase === 0 ? [] : [review({ state: phase === 1 ? "APPROVED" : "CHANGES_REQUESTED" })]]);
+      return JSON.stringify([phase === 0 ? [] : [review({ state: phase <= 2 ? "APPROVED" : "CHANGES_REQUESTED" })]]);
     }
-    return JSON.stringify(detail(1, phase === 3 ? { head: { sha: "new-sha" } } : {}));
+    return JSON.stringify(detail(1, phase === 2 || phase === 4 ? { head: { sha: "new-sha" } } : {}));
   };
   const client = new GitHubClient(run);
-  for (const expected of ["waiting", "approved", "changes", "updated"] as const) {
+  for (const expected of ["waiting", "approved", "updated", "changes", "updated"] as const) {
     const pulls = await client.load();
     expect(pulls).toHaveLength(1);
     expect(pulls[0]?.status).toBe(expected);

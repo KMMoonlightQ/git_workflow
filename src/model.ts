@@ -42,7 +42,9 @@ export function reviewStatus(reviews: Review[], login: string, headSha: string):
     .sort((a, b) => Date.parse(b.submitted_at!) - Date.parse(a.submitted_at!) || b.id - a.id);
 
   const latest = decisions[0];
-  if (latest?.state === "APPROVED") return "approved";
+  if (latest?.state === "APPROVED") {
+    return latest.commit_id && latest.commit_id !== headSha ? "updated" : "approved";
+  }
   if (latest?.state === "CHANGES_REQUESTED") {
     return latest.commit_id && latest.commit_id !== headSha ? "updated" : "changes";
   }

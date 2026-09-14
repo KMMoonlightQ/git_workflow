@@ -1,4 +1,4 @@
-# git_workflow
+# git-workflow
 
 TypeScript + OpenTUI 的 GitHub Review 列表，复用本机 `gh` 登录。
 
@@ -15,12 +15,12 @@ npm start
 npm run install:local
 ```
 
-安装程序将独立可执行文件复制到 `~/.local/bin/git_workflow`，并将该目录写入 shell 启动配置（zsh 使用 `${ZDOTDIR:-$HOME}/.zshrc`）。首次修改前会保存 `.git_workflow.bak` 备份；重复安装会更新程序，且不会重复添加 PATH 条目。
+安装程序将独立可执行文件复制到 `~/.local/bin/git-workflow`，并将该目录写入 shell 启动配置（zsh 使用 `${ZDOTDIR:-$HOME}/.zshrc`）。首次修改前会保存 `.git-workflow.bak` 备份；重复安装会更新程序，且不会重复添加 PATH 条目。旧名称 `git_workflow` 的 PATH 配置会自动迁移。
 
 重新打开终端，即可在任意目录运行：
 
 ```sh
-git_workflow
+git-workflow
 ```
 
 当前 zsh 终端也可以执行 `source "${ZDOTDIR:-$HOME}/.zshrc"` 立即生效。
@@ -29,19 +29,19 @@ git_workflow
 
 ```sh
 npm run build
-./dist/git_workflow
+./dist/git-workflow
 ```
 
-`dist/git_workflow` 内含 Bun 运行时和 OpenTUI 原生库，可以复制到同平台机器运行，无需安装 Node.js、Bun 或项目依赖。直接运行 `./git_workflow --install` 即可安装并配置 PATH。运行时仍需本机已登录的 `gh`。当前构建平台为 macOS Apple Silicon（arm64）。
+`dist/git-workflow` 内含 Bun 运行时和 OpenTUI 原生库，可以复制到同平台机器运行，无需安装 Node.js、Bun 或项目依赖。直接运行 `./git-workflow --install` 即可安装并配置 PATH。运行时仍需本机已登录的 `gh`。当前构建平台为 macOS Apple Silicon（arm64）。
 
 按完整仓库名分组，同仓库内最近更新的 PR 在前。每行依次展示编号、标题、`@author` 和状态，状态在行末对齐。
 
 | 状态 | 颜色 | 条件 |
 | --- | --- | --- |
 | `[等待]` | 蓝色 | 当前用户尚无有效的同意或修改决定 |
-| `[同意]` | 绿色 | 当前用户最近的有效决定为 Approve |
+| `[同意]` | 绿色 | 当前用户最近的有效决定为 Approve，HEAD 与该 Review 的 commit 相同 |
 | `[修改]` | 红色 | 当前用户最近的有效决定为 Request changes，HEAD 与该 Review 的 commit 相同 |
-| `[提交]` | 黄色 | Request changes 后，HEAD 与该 Review 的 commit 不同 |
+| `[提交]` | 黄色 | Approve 或 Request changes 后，HEAD 与该 Review 的 commit 不同 |
 
 只展示未关闭、未合并、非 Draft 的 PR。合并“请求当前用户 Review”（包含所属团队的请求）和“当前用户已 Review”的搜索结果并去重，Review 状态变化不会移除 PR。状态只依据当前用户的 Review，普通评论和尚未提交的 Review 不覆盖已有决定；决定被撤销后显示等待。用 commit SHA 判断代码变化，避免把修改标题、标签或普通评论误判为新提交。
 

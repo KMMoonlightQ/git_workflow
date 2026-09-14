@@ -13,8 +13,15 @@ describe("current user's review status", () => {
     ], "alice", "head-sha")).toBe("waiting");
   });
 
-  test("approval stays approved after a new commit", () => {
-    expect(reviewStatus([review({ state: "APPROVED" })], "ALICE", "new-sha")).toBe("approved");
+  test("approval becomes submitted after a new commit and approved again after reapproval", () => {
+    const approval = review({ state: "APPROVED" });
+    expect(reviewStatus([approval], "ALICE", "head-sha")).toBe("approved");
+    expect(reviewStatus([approval], "ALICE", "new-sha")).toBe("updated");
+    expect(reviewStatus([review({ state: "APPROVED", commit_id: null })], "alice", "new-sha")).toBe("approved");
+    const reapproval = review({
+      id: 2, state: "APPROVED", commit_id: "new-sha", submitted_at: "2026-09-14T02:00:00Z",
+    });
+    expect(reviewStatus([approval, reapproval], "alice", "new-sha")).toBe("approved");
   });
 
   test("changes requested becomes submitted when the head differs from the reviewed commit", () => {
@@ -25,7 +32,7 @@ describe("current user's review status", () => {
 
   test("the latest decision wins even when reviews arrive out of order", () => {
     const earlier = review();
-    const approval = review({ id: 2, state: "APPROVED", submitted_at: "2026-09-14T02:00:00Z" });
+    const approval = review({ id: 2, state: "APPROVED", commit_id: "new-sha", submitted_at: "2026-09-14T02:00:00Z" });
     expect(reviewStatus([approval, earlier], "alice", "new-sha")).toBe("approved");
     const rejection = review({ id: 3, submitted_at: "2026-09-14T03:00:00Z", commit_id: "new-sha" });
     expect(reviewStatus([rejection, approval, earlier], "alice", "new-sha")).toBe("changes");
